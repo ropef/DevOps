@@ -1,4 +1,3 @@
-
 print("start")
 from config import TELEGRAM_TOKEN
 import re

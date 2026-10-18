@@ -1,4 +1,4 @@
-import requests
+  import requests
 from bs4 import BeautifulSoup
 
 
@@ -13,7 +13,7 @@ HEADERS = {
 }
 
 def get_rates(url):
-    """Возвращает список словарей с курсами валют."""
+    """Возврат списка с курсами валют."""
     response = requests.get(url, headers=HEADERS, timeout=10)
     response.raise_for_status()  # ошибка, если статус не 200
 
