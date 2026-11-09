@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_Farm" targetNamespace="http://bpmn.io/schema/bpmn" exporter="bpmn-js (https://demo.bpmn.io)" exporterVersion="18.31.1">
+  <bpmn:collaboration id="Collaboration_Farm">
+    <bpmn:participant id="Participant_Farm" name="Фермерское хозяйство" processRef="Process_Farm" />
+    <bpmn:participant id="Participant_Buyer" name="Покупатель" processRef="Process_Buyer" />
+    <bpmn:messageFlow id="Message_Order" name="Заказ покупателя" sourceRef="Task_Order" targetRef="Task_Publish" />
+    <bpmn:messageFlow id="Message_Delivery" name="Подтверждение и отгрузка" sourceRef="Task_Publish" targetRef="Task_Receive" />
+  </bpmn:collaboration>
+  <bpmn:process id="Process_Farm" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_Farm">
+      <bpmn:lane id="Lane_Warehouse" name="Склад / система">
+        <bpmn:flowNodeRef>Task_AcceptResources</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_StockHarvest</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Publish</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_ReadyForSale</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Worker" name="Работник">
+        <bpmn:flowNodeRef>Task_Care</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_Problems</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Treat</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_HarvestReady</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Harvest</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Agronomist" name="Агроном">
+        <bpmn:flowNodeRef>Start_Season</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Plan</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_Resources</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Request</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Sow</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="Start_Season" name="Начало сезона" />
+    <bpmn:task id="Task_Plan" name="Планирование севооборота" />
+    <bpmn:exclusiveGateway id="Gateway_Resources" name="Достаточно ресурсов?" />
+    <bpmn:task id="Task_Request" name="Заявка поставщику" />
+    <bpmn:task id="Task_AcceptResources" name="Приёмка ресурсов" />
+    <bpmn:task id="Task_Sow" name="Подготовка почвы и посев" />
+    <bpmn:task id="Task_Care" name="Уход за посевами" />
+    <bpmn:exclusiveGateway id="Gateway_Problems" name="Есть проблемы?" />
+    <bpmn:task id="Task_Treat" name="Обработка / корректировка" />
+    <bpmn:exclusiveGateway id="Gateway_HarvestReady" name="Урожай готов?" />
+    <bpmn:task id="Task_Harvest" name="Сбор урожая" />
+    <bpmn:task id="Task_StockHarvest" name="Инвентаризация урожая" />
+    <bpmn:task id="Task_Publish" name="Публикация товара" />
+    <bpmn:endEvent id="End_ReadyForSale" name="Товар готов к продаже" />
+    <bpmn:sequenceFlow id="F1" sourceRef="Start_Season" targetRef="Task_Plan" />
+    <bpmn:sequenceFlow id="F2" sourceRef="Task_Plan" targetRef="Gateway_Resources" />
+    <bpmn:sequenceFlow id="F3_NoResources" name="Нет" sourceRef="Gateway_Resources" targetRef="Task_Request" />
+    <bpmn:sequenceFlow id="F6_ResourcesOK" name="Да" sourceRef="Gateway_Resources" targetRef="Task_Sow" />
+    <bpmn:sequenceFlow id="F4" sourceRef="Task_Request" targetRef="Task_AcceptResources" />
+    <bpmn:sequenceFlow id="F5" sourceRef="Task_AcceptResources" targetRef="Task_Sow" />
+    <bpmn:sequenceFlow id="F7" sourceRef="Task_Sow" targetRef="Task_Care" />
+    <bpmn:sequenceFlow id="F12_NotReady" name="Нет" sourceRef="Gateway_HarvestReady" targetRef="Task_Care" />
+    <bpmn:sequenceFlow id="F8" sourceRef="Task_Care" targetRef="Gateway_Problems" />
+    <bpmn:sequenceFlow id="F9_Problems" name="Да" sourceRef="Gateway_Problems" targetRef="Task_Treat" />
+    <bpmn:sequenceFlow id="F11_NoProblems" name="Нет" sourceRef="Gateway_Problems" targetRef="Gateway_HarvestReady" />
+    <bpmn:sequenceFlow id="F10" sourceRef="Task_Treat" targetRef="Gateway_HarvestReady" />
+    <bpmn:sequenceFlow id="F13_Ready" name="Да" sourceRef="Gateway_HarvestReady" targetRef="Task_Harvest" />
+    <bpmn:sequenceFlow id="F14" sourceRef="Task_Harvest" targetRef="Task_StockHarvest" />
+    <bpmn:sequenceFlow id="F15" sourceRef="Task_StockHarvest" targetRef="Task_Publish" />
+    <bpmn:sequenceFlow id="F16" sourceRef="Task_Publish" targetRef="End_ReadyForSale" />
+  </bpmn:process>
+  <bpmn:process id="Process_Buyer" isExecutable="false">
+    <bpmn:startEvent id="Start_Need" name="Возникла потребность" />
+    <bpmn:task id="Task_Order" name="Оформление заказа" />
+    <bpmn:task id="Task_Receive" name="Получение продукции" />
+    <bpmn:endEvent id="End_OrderReceived" name="Заказ получен" />
+    <bpmn:sequenceFlow id="B1" sourceRef="Start_Need" targetRef="Task_Order" />
+    <bpmn:sequenceFlow id="B2" sourceRef="Task_Order" targetRef="Task_Receive" />
+    <bpmn:sequenceFlow id="B3" sourceRef="Task_Receive" targetRef="End_OrderReceived" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Farm">
+    <bpmndi:BPMNPlane id="BPMNPlane_Farm" bpmnElement="Collaboration_Farm">
+      <bpmndi:BPMNShape id="Participant_Farm_di" bpmnElement="Participant_Farm" isHorizontal="true">
+        <dc:Bounds x="160" y="70" width="1780" height="570" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Warehouse_di" bpmnElement="Lane_Warehouse" isHorizontal="true">
+        <dc:Bounds x="190" y="450" width="1750" height="190" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Worker_di" bpmnElement="Lane_Worker" isHorizontal="true">
+        <dc:Bounds x="190" y="260" width="1750" height="190" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Agronomist_di" bpmnElement="Lane_Agronomist" isHorizontal="true">
+        <dc:Bounds x="190" y="70" width="1750" height="190" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Start_Season_di" bpmnElement="Start_Season">
+        <dc:Bounds x="250" y="145" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="230" y="181" width="76" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Plan_di" bpmnElement="Task_Plan">
+        <dc:Bounds x="330" y="125" width="130" height="76" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_Resources_di" bpmnElement="Gateway_Resources" isMarkerVisible="true">
+        <dc:Bounds x="510" y="138" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="506" y="188" width="59" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Request_di" bpmnElement="Task_Request">
+        <dc:Bounds x="620" y="125" width="130" height="76" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_AcceptResources_di" bpmnElement="Task_AcceptResources">
+        <dc:Bounds x="620" y="505" width="130" height="76" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Sow_di" bpmnElement="Task_Sow">
+        <dc:Bounds x="840" y="125" width="150" height="76" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Care_di" bpmnElement="Task_Care">
+        <dc:Bounds x="1060" y="315" width="140" height="76" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_Problems_di" bpmnElement="Gateway_Problems" isMarkerVisible="true">
+        <dc:Bounds x="1260" y="328" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1243" y="378" width="85" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Treat_di" bpmnElement="Task_Treat">
+        <dc:Bounds x="1380" y="315" width="145" height="76" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_HarvestReady_di" bpmnElement="Gateway_HarvestReady" isMarkerVisible="true">
+        <dc:Bounds x="1590" y="328" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1578" y="378" width="74" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Harvest_di" bpmnElement="Task_Harvest">
+        <dc:Bounds x="1730" y="315" width="130" height="76" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_StockHarvest_di" bpmnElement="Task_StockHarvest">
+        <dc:Bounds x="1730" y="505" width="130" height="76" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Publish_di" bpmnElement="Task_Publish">
+        <dc:Bounds x="1510" y="505" width="145" height="76" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="End_ReadyForSale_di" bpmnElement="End_ReadyForSale">
+        <dc:Bounds x="1400" y="525" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1384" y="561" width="68" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="F1_di" bpmnElement="F1">
+        <di:waypoint x="286" y="163" />
+        <di:waypoint x="330" y="163" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F2_di" bpmnElement="F2">
+        <di:waypoint x="460" y="163" />
+        <di:waypoint x="510" y="163" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F3_NoResources_di" bpmnElement="F3_NoResources">
+        <di:waypoint x="560" y="163" />
+        <di:waypoint x="620" y="163" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="581" y="138" width="19" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F4_di" bpmnElement="F4">
+        <di:waypoint x="685" y="201" />
+        <di:waypoint x="685" y="505" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F5_di" bpmnElement="F5">
+        <di:waypoint x="750" y="543" />
+        <di:waypoint x="800" y="543" />
+        <di:waypoint x="800" y="163" />
+        <di:waypoint x="840" y="163" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F6_ResourcesOK_di" bpmnElement="F6_ResourcesOK">
+        <di:waypoint x="535" y="138" />
+        <di:waypoint x="535" y="100" />
+        <di:waypoint x="915" y="100" />
+        <di:waypoint x="915" y="125" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="718" y="75" width="14" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F7_di" bpmnElement="F7">
+        <di:waypoint x="990" y="163" />
+        <di:waypoint x="1025" y="163" />
+        <di:waypoint x="1025" y="353" />
+        <di:waypoint x="1060" y="353" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F8_di" bpmnElement="F8">
+        <di:waypoint x="1200" y="353" />
+        <di:waypoint x="1260" y="353" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F9_Problems_di" bpmnElement="F9_Problems">
+        <di:waypoint x="1310" y="353" />
+        <di:waypoint x="1380" y="353" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1338" y="328" width="14" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F10_di" bpmnElement="F10">
+        <di:waypoint x="1525" y="353" />
+        <di:waypoint x="1590" y="353" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F11_NoProblems_di" bpmnElement="F11_NoProblems">
+        <di:waypoint x="1285" y="328" />
+        <di:waypoint x="1285" y="285" />
+        <di:waypoint x="1615" y="285" />
+        <di:waypoint x="1615" y="328" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1441" y="260" width="19" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F12_NotReady_di" bpmnElement="F12_NotReady">
+        <di:waypoint x="1590" y="353" />
+        <di:waypoint x="1530" y="420" />
+        <di:waypoint x="1130" y="420" />
+        <di:waypoint x="1130" y="391" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1321" y="395" width="19" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F13_Ready_di" bpmnElement="F13_Ready">
+        <di:waypoint x="1640" y="353" />
+        <di:waypoint x="1730" y="353" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1678" y="328" width="14" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F14_di" bpmnElement="F14">
+        <di:waypoint x="1795" y="391" />
+        <di:waypoint x="1795" y="505" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F15_di" bpmnElement="F15">
+        <di:waypoint x="1730" y="543" />
+        <di:waypoint x="1655" y="543" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F16_di" bpmnElement="F16">
+        <di:waypoint x="1510" y="543" />
+        <di:waypoint x="1436" y="543" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Participant_Buyer_di" bpmnElement="Participant_Buyer" isHorizontal="true">
+        <dc:Bounds x="160" y="720" width="1780" height="150" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Start_Need_di" bpmnElement="Start_Need">
+        <dc:Bounds x="250" y="777" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="236" y="813" width="64" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Order_di" bpmnElement="Task_Order">
+        <dc:Bounds x="380" y="757" width="145" height="76" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Receive_di" bpmnElement="Task_Receive">
+        <dc:Bounds x="1080" y="757" width="150" height="76" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="End_OrderReceived_di" bpmnElement="End_OrderReceived">
+        <dc:Bounds x="1340" y="777" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1321" y="813" width="74" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="B1_di" bpmnElement="B1">
+        <di:waypoint x="286" y="795" />
+        <di:waypoint x="380" y="795" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="B2_di" bpmnElement="B2">
+        <di:waypoint x="525" y="795" />
+        <di:waypoint x="1080" y="795" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="B3_di" bpmnElement="B3">
+        <di:waypoint x="1230" y="795" />
+        <di:waypoint x="1340" y="795" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Message_Order_di" bpmnElement="Message_Order">
+        <di:waypoint x="452" y="757" />
+        <di:waypoint x="1580" y="581" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="971" y="644" width="90" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Message_Delivery_di" bpmnElement="Message_Delivery">
+        <di:waypoint x="1580" y="581" />
+        <di:waypoint x="1155" y="757" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1327" y="644" width="82" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
