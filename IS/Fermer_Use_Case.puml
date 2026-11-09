@@ -1,0 +1,64 @@
+@startuml
+title ИС фермерского хозяйства — Use Case
+left to right direction
+skinparam packageStyle rectangle
+
+
+actor "Руководитель" as Manager
+actor "Агроном" as Agronom
+actor "Работник" as Worker
+actor "Кладовщик (Склад)" as Storekeeper
+actor "Бухгалтер" as Accountant
+actor "Поставщик" as Provider
+actor "Покупатель" as Buyer
+
+rectangle "Фермерское хозяйство" {
+  usecase "Управлять пользователями и ролями" as UC1
+  usecase "Просматривать отчёты и статусы документов" as UC2
+  usecase "Согласовывать электронные документы" as UC3
+
+  usecase "Вести план посевов и сельхозработ" as UC4
+  usecase "Создавать электронную заявку на закупку" as UC5
+  usecase "Учитывать выполнение полевых работ" as UC6
+  usecase "Контролировать состояние посевов" as UC7
+
+  usecase "Вести складской учёт" as UC8
+  usecase "Оформлять электронный акт приёмки" as UC9
+  usecase "Регистрировать урожай" as UC10
+
+  usecase "Оформлять продажу продукции" as UC11
+  usecase "Формировать договор, счёт и накладную" as UC12
+
+  usecase "Сохранять документы в электронном архиве" as UC13
+  usecase "Отправлять и получать электронные документы" as UC14
+}
+
+Manager -- UC1
+Manager -- UC2
+Manager -- UC3
+
+Agronom -- UC4
+Agronom -- UC5
+Agronom -- UC6
+Agronom -- UC7
+Agronom -- UC10
+
+Worker -- UC6
+
+Storekeeper -- UC8
+Storekeeper -- UC9
+Storekeeper -- UC10
+
+Accountant -- UC11
+Accountant -- UC12
+Accountant -- UC13
+
+Provider -- UC14
+Buyer -- UC14
+
+UC5 .> UC3 : <<include>>
+UC9 .> UC13 : <<include>>
+UC12 .> UC13 : <<include>>
+UC3 .> UC13 : <<include>>
+UC14 .> UC13 : <<include>>
+@enduml

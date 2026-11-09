@@ -1,0 +1,133 @@
+@startuml
+title ИС фермерского хозяйства — Class Diagram
+skinparam classAttributeIconSize 0
+
+
+enum Role {
+  MANAGER
+  AGRONOM
+  WORKER
+  ACCOUNTANT
+}
+
+enum DocumentStatus {
+  DRAFT
+  ON_APPROVAL
+  APPROVED
+  REJECTED
+  SIGNED
+ 
+}
+
+class User {
+  - id: int
+  - fullName: string
+  - login: string
+  - passwordHash: string
+  - role: Role
+  login(): bool
+  logout(): void
+}
+
+abstract class Document {
+  - id: int
+  - number: string
+  - creationDate: Date
+  - status: DocumentStatus
+  - filePath: string
+  create(): void
+  changeStatus(): void
+
+}
+
+class PurchaseRequest {
+  - purpose: string
+  - requestedDate: Date
+  - totalAmount: decimal
+  submit(): void
+}
+
+class Invoice {
+  - supplierName: string
+  - amount: decimal
+  - paymentDueDate: Date
+  register(): void
+}
+
+class AcceptanceAct {
+  - deliveryDate: Date
+  - acceptedQuantity: decimal
+  - remarks: string
+  confirmReceipt(): void
+}
+
+
+
+class Attachment {
+  - id: int
+  - fileName: string
+  - fileType: string
+  - filePath: string
+  upload(): void
+  download(): void
+}
+
+class Field {
+  - id: int
+  - name: string
+  - area: decimal
+  - cropType: string
+  updateInfo(): void
+}
+
+class AgriculturalWork {
+  - id: int
+  - workType: string
+  - workDate: Date
+  - result: string
+   recordResult(): void
+}
+
+class Crop {
+  - id: int
+  - cropType: string
+  - batchNumber: string
+  - cropDate: Date
+  register(): void
+}
+
+class StockItem {
+  - id: int
+  - name: string
+  - quantity: decimal
+  - unit: string
+  updateBalance(): void
+}
+
+class Sale {
+  - id: int
+  - buyerName: string
+  - saleDate: Date
+  - totalAmount: decimal
+  createSale(): void
+}
+
+Document <|-- PurchaseRequest
+Document <|-- Invoice
+Document <|-- AcceptanceAct
+
+
+
+
+Document "1" *-- "0..*" Attachment : вложения
+
+Field "1" -- "0..*" AgriculturalWork : выполняются работы
+Field "1" -- "0..*" Crop : даёт урожай
+StockItem "1" -- "0..*" AcceptanceAct : отражается в приёмке
+Crop "0..*" --> "1" StockItem : поступает на склад
+Sale "1" --> "1..*" Crop : включает партии урожая
+User "1" -- "0..*" Document : создаёт
+
+User --> Role
+Document --> DocumentStatus
+@enduml
